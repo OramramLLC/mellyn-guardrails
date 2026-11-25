@@ -51,17 +51,17 @@ EXTRA_SCANNED = (Path("AGENTS.md"), Path("GEMINI.md"), Path(".windsurfrules"), P
 # Directories of instruction files (any depth), scanned for hidden characters.
 EXTRA_SCANNED_GLOBS = (".agent/rules/**/*.md", ".cursor/rules/**/*.mdc", ".github/instructions/**/*.md")
 
-# The generated files name mellyn-guardrails' script, not a local path: repositories that use the pack do not have
-# scripts/sync_agent_rules.py themselves.
+# Changing either header changes every generated file, and CI judges a pull request with the BASE commit's copy of
+# this script, which still renders the old header. Such a change cannot pass in one pull request: make the check
+# accept both headers first, regenerate in a second pull request, then drop the old header.
 HEADER = (
-    "<!-- GENERATED FILE — DO NOT EDIT. Source: {src}\n"
-    "     Regenerate with mellyn-guardrails' scripts/sync_agent_rules.py (--root <repository>) -->\n\n"
+    "<!-- GENERATED FILE — DO NOT EDIT. Source: {src}\n     Regenerate with: python scripts/sync_agent_rules.py -->\n\n"
 )
 SELF_POLICY_HEADER = (
     "# GENERATED FILE — DO NOT EDIT. Source: config/mellyn-policy.example.toml\n"
-    "# Regenerate with mellyn-guardrails' scripts/sync_agent_rules.py (--root <repository>)\n"
-    "# Policy for agents working on THIS repository: the example policy plus this repository's protected paths.\n"
-    "# Loaded strictly and fail-closed by Mellyn Security's `mellyn.policy_loader.load_policy_file()`.\n"
+    "# Regenerate with: python scripts/sync_agent_rules.py\n"
+    "# Mellyn Security — Policy for agents working on THIS repository (Mellyn Security itself)\n"
+    "# Loaded strictly and fail-closed by `mellyn.policy_loader.load_policy_file()`.\n"
 )
 
 

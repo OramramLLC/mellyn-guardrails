@@ -1,5 +1,5 @@
 <!-- GENERATED FILE — DO NOT EDIT. Source: .agent/rules/owasp-secure-ai-coding.md
-     Regenerate with mellyn-guardrails' scripts/sync_agent_rules.py (--root <repository>) -->
+     Regenerate with: python scripts/sync_agent_rules.py -->
 
 # Secure AI-Assisted Coding — Engineering Steering Guidelines
 
