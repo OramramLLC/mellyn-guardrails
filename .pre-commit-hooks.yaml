@@ -38,7 +38,7 @@
   args: ["--check"]
   language: python
   pass_filenames: false
-  files: ^(\.agent/rules/.+\.md|\.cursor/rules/.+\.mdc|\.github/instructions/.+\.md|\.cursorrules|\.windsurfrules|\.clinerules|\.github/copilot-instructions\.md|CLAUDE\.md|AGENTS\.md|GEMINI\.md)$
+  files: ^(\.agent/rules/.+\.md|\.cursor/rules/.+\.mdc|\.github/instructions/.+\.md|\.cursorrules|\.windsurfrules|\.clinerules|\.github/copilot-instructions\.md|CLAUDE\.md|AGENTS\.md|GEMINI\.md|config/mellyn-(policy\.example|self-policy)\.toml)$
 
 - id: mellyn-gitleaks
   name: Mellyn Security — AI & Cloud Secret Scan (Gitleaks)

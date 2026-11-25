@@ -1,7 +1,7 @@
 # GENERATED FILE — DO NOT EDIT. Source: config/mellyn-policy.example.toml
-# Regenerate with: python scripts/sync_agent_rules.py
-# Mellyn Security — Policy for agents working on THIS repository (Mellyn Security itself)
-# Loaded strictly and fail-closed by `mellyn.policy_loader.load_policy_file()`.
+# Regenerate with mellyn-guardrails' scripts/sync_agent_rules.py (--root <repository>)
+# Policy for agents working on THIS repository: the example policy plus this repository's protected paths.
+# Loaded strictly and fail-closed by Mellyn Security's `mellyn.policy_loader.load_policy_file()`.
 
 schema_version = 1
 
