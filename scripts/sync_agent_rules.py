@@ -51,6 +51,9 @@ EXTRA_SCANNED = (Path("AGENTS.md"), Path("GEMINI.md"), Path(".windsurfrules"), P
 # Directories of instruction files (any depth), scanned for hidden characters.
 EXTRA_SCANNED_GLOBS = (".agent/rules/**/*.md", ".cursor/rules/**/*.mdc", ".github/instructions/**/*.md")
 
+# Changing either header changes every generated file, and CI judges a pull request with the BASE commit's copy of
+# this script, which still renders the old header. Such a change cannot pass in one pull request: make the check
+# accept both headers first, regenerate in a second pull request, then drop the old header.
 HEADER = (
     "<!-- GENERATED FILE — DO NOT EDIT. Source: {src}\n     Regenerate with: python scripts/sync_agent_rules.py -->\n\n"
 )
