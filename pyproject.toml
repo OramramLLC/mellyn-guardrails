@@ -1,0 +1,20 @@
+# pre-commit installs `language: python` hooks with `pip install .`. This in-tree, standard-library-only backend
+# makes that work with no build dependency to download; see _hook_backend/mellyn_hook_backend.py.
+[build-system]
+requires = []
+build-backend = "mellyn_hook_backend"
+backend-path = ["_hook_backend"]
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+# Intentionally insecure Semgrep rule fixtures, at the repository root only: a bare ".semgrep" would also skip a
+# `.semgrep/` directory at any depth, a place to hide code from the linter.
+extend-exclude = ["./.semgrep"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "S", "B", "UP"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["scripts"]

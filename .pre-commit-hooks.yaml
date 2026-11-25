@@ -1,0 +1,60 @@
+# Mellyn Guardrails — Versioned Pre-Commit Hook Pack
+#
+# Client repositories consume these hooks pinned by commit SHA, without copying scripts:
+#
+#   - repo: https://github.com/OramramLLC/mellyn-guardrails
+#     rev: <40-char-commit-sha>
+#     hooks:
+#       - id: mellyn-verify-dependencies
+#         args: [--online]
+#       - id: mellyn-check-agent-rules
+#       - id: mellyn-gitleaks
+#       - id: mellyn-semgrep
+#
+# `language: python`: pre-commit builds a private virtualenv from the Python that runs pre-commit (3.12+) and
+# installs this repository into it with `pip install .`. The in-tree build backend (_hook_backend/) needs no
+# download, and its console scripts run the scripts below from pre-commit's clone at the pinned `rev`. Unlike
+# `language: script` (`#!/usr/bin/env python3`), this also works on Windows, where `python3` is often the
+# Microsoft Store stub.
+
+- id: mellyn-verify-dependencies
+  name: Mellyn Security — OWASP AI Dependency & Anti-Slopsquatting Verifier
+  description: >
+    Verifies Python (pyproject.toml, requirements*.txt) and npm (package.json) manifests for meaningful version
+    floors and registry-only sources. Pass `args: [--online]` to also check that every package exists on
+    PyPI/npm and is at least 90 days old.
+  entry: mellyn-verify-dependencies
+  language: python
+  pass_filenames: false
+  files: (^|/)(pyproject\.toml|requirements.*\.(txt|lock)|uv\.lock|package(-lock)?\.json|\.mellyn-allowlist\.toml)$
+
+- id: mellyn-check-agent-rules
+  name: Mellyn Security — AI Instruction File Hidden-Unicode & Sync Check
+  description: >
+    Rejects invisible Unicode format/bidi/tag characters ("Rules File Backdoor" prompt injection) in AI coding
+    assistant instruction files. In repositories that use the canonical .agent/rules/owasp-secure-ai-coding.md,
+    also checks that the generated copies and the CLAUDE.md import are in sync.
+  entry: mellyn-check-agent-rules
+  args: ["--check"]
+  language: python
+  pass_filenames: false
+  files: ^(\.agent/rules/.+\.md|\.cursor/rules/.+\.mdc|\.github/instructions/.+\.md|\.cursorrules|\.windsurfrules|\.clinerules|\.github/copilot-instructions\.md|CLAUDE\.md|AGENTS\.md|GEMINI\.md)$
+
+- id: mellyn-gitleaks
+  name: Mellyn Security — AI & Cloud Secret Scan (Gitleaks)
+  description: >
+    Scans staged git changes using Mellyn Guardrails' pinned AI and cloud secret rules (.gitleaks.toml).
+    Requires `gitleaks` installed locally (the reusable CI workflow supplies a checksum-verified binary).
+  entry: mellyn-gitleaks
+  language: python
+  pass_filenames: false
+
+- id: mellyn-semgrep
+  name: Mellyn Security — OWASP AI-Assisted Coding SAST (Semgrep)
+  description: >
+    Scans staged Python and JavaScript/TypeScript files with Mellyn Guardrails' OWASP AI Semgrep rules.
+    Requires `semgrep` installed locally (the reusable CI workflow installs hash-locked Semgrep).
+  entry: mellyn-semgrep
+  language: python
+  types_or: [python, javascript, jsx, ts, tsx]
+  exclude: ^\.semgrep/
