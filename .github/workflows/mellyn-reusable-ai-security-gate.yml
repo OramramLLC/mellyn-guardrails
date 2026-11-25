@@ -130,7 +130,9 @@ jobs:
           repository: ${{ job.workflow_repository }}
           ref: ${{ job.workflow_sha }}
           path: mellyn
+          # .agent holds the canonical rules that `--require-pack-canonical` (require-pack-rules) compares against.
           sparse-checkout: |
+            .agent
             .semgrep
             deploy
             scripts

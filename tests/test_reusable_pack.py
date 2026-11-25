@@ -136,6 +136,49 @@ class TestReusableWorkflowSecurity(unittest.TestCase):
         self.assertIn("hashlib.sha256(", helper_text)
 
 
+class TestReusableWorkflowChecksOutWhatItReads(unittest.TestCase):
+    """
+    Each job checks out this pack into `mellyn/` with a sparse checkout (cone mode: listed directories plus every
+    root file). A step that reads a pack directory the job did not check out fails in consumers' CI only; this
+    pack's own CI uses a full checkout, so only this test catches it. `require-pack-rules` shipped without `.agent`.
+    """
+
+    # Directories the scripts read inside `mellyn/` without the workflow naming them: (marker in a job, directory).
+    IMPLICIT_READS = (
+        ("--require-pack-canonical", ".agent"),
+        ("run-semgrep --target caller --guardrails mellyn", ".semgrep"),
+        ("requirements-ci-scanners.lock", "deploy"),
+    )
+
+    def jobs(self) -> dict[str, str]:
+        text = REUSABLE_WORKFLOW.read_text(encoding="utf-8")
+        jobs_text = text.split("\njobs:\n", 1)[1]
+        return dict(re.findall(r"^  ([A-Za-z0-9_-]+):\n((?:(?:    .*)?\n)+)", jobs_text, flags=re.MULTILINE))
+
+    def sparse_dirs(self, job: str) -> set[str]:
+        block = re.search(r"path: mellyn\n(?:.*\n)*?\s+sparse-checkout: \|\n((?:\s{12}\S.*\n)+)", job)
+        self.assertIsNotNone(block, "the job must check out mellyn/ sparsely")
+        return {line.strip() for line in block.group(1).splitlines()}
+
+    def test_every_pack_directory_a_job_reads_is_in_its_sparse_checkout(self) -> None:
+        jobs = self.jobs()
+        self.assertGreaterEqual(len(jobs), 2)
+        for job_id, job in jobs.items():
+            if "path: mellyn" not in job:
+                continue
+            checked_out = self.sparse_dirs(job)
+            named = {m for m in re.findall(r"mellyn/([^/\s\"']+)/", job)}
+            implicit = {directory for marker, directory in self.IMPLICIT_READS if marker in job}
+            for directory in sorted(named | implicit):
+                with self.subTest(job=job_id, directory=directory):
+                    self.assertIn(directory, checked_out)
+
+    def test_pack_rules_comparison_has_the_canonical_rules_to_compare_against(self) -> None:
+        jobs = [job for job in self.jobs().values() if "--require-pack-canonical" in job]
+        self.assertEqual(len(jobs), 1)
+        self.assertIn(".agent", self.sparse_dirs(jobs[0]))
+
+
 class TestOwnGateSuppressions(unittest.TestCase):
     def test_this_repositorys_gate_ignores_suppressions_too(self) -> None:
         text = OWN_GATE.read_text(encoding="utf-8")
